@@ -96,6 +96,10 @@ export async function deleteBlogPost(id: number) {
   return await db.delete(blogPostsTable).where(eq(blogPostsTable.id, id));
 }
 
+export async function incrementBlogPostViewCount(id: number) {
+  return await db.update(blogPostsTable).set({ viewCount: sql`${blogPostsTable.viewCount} + 1` }).where(eq(blogPostsTable.id, id)).returning();
+}
+
 // AI Products Queries
 export async function getAllAIProducts(limit = 10, offset = 0) {
   return await db.select().from(aiProductsTable).where(eq(aiProductsTable.isActive, true)).orderBy(desc(aiProductsTable.createdAt)).limit(limit).offset(offset);
