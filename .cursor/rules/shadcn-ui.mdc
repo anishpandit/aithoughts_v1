@@ -1,0 +1,246 @@
+---
+alwaysApply: false
+---
+# Project Guidelines
+
+## UI Framework
+
+This project uses **shadcn/ui** for all UI elements and components.
+
+### shadcn/ui Configuration
+
+shadcn/ui is initialized in this project with the following settings:
+- **Style**: New York
+- **Base Color**: Slate
+- **Framework**: Next.js with React Server Components (RSC)
+- **Icon Library**: Lucide React
+- **CSS Variables**: Enabled
+- **Tailwind**: v4
+
+### File Structure
+
+```
+├── components/
+│   └── ui/               # shadcn/ui components go here
+├── lib/
+│   └── utils.ts          # cn() utility for merging Tailwind classes
+├── app/
+│   └── globals.css       # Theme colors and CSS variables
+└── components.json       # shadcn/ui configuration
+```
+
+### Adding Components
+
+If a particular shadcn/ui component is not installed, use the following command:
+
+```bash
+npx shadcn@latest add <component-name>
+```
+
+**Common Components:**
+```bash
+# Form elements
+npx shadcn@latest add button
+npx shadcn@latest add input
+npx shadcn@latest add textarea
+npx shadcn@latest add select
+npx shadcn@latest add checkbox
+npx shadcn@latest add radio-group
+npx shadcn@latest add switch
+npx shadcn@latest add slider
+npx shadcn@latest add form
+
+# Layout
+npx shadcn@latest add card
+npx shadcn@latest add separator
+npx shadcn@latest add accordion
+npx shadcn@latest add tabs
+
+# Overlays
+npx shadcn@latest add dialog
+npx shadcn@latest add sheet
+npx shadcn@latest add popover
+npx shadcn@latest add dropdown-menu
+npx shadcn@latest add alert-dialog
+
+# Feedback
+npx shadcn@latest add toast
+npx shadcn@latest add alert
+npx shadcn@latest add badge
+npx shadcn@latest add skeleton
+
+# Navigation
+npx shadcn@latest add navigation-menu
+npx shadcn@latest add breadcrumb
+npx shadcn@latest add pagination
+```
+
+### Component Usage Guidelines
+
+1. **Always use shadcn/ui components** instead of plain HTML elements
+2. **Import from the correct path**: `@/components/ui/<component-name>`
+3. **Use the `cn()` utility** from `@/lib/utils` to merge Tailwind classes:
+   ```tsx
+   import { cn } from "@/lib/utils"
+   
+   <Button className={cn("w-full", isActive && "bg-primary")} />
+   ```
+4. **Follow composition patterns**: Build complex UIs by composing shadcn/ui primitives
+5. **Maintain accessibility**: shadcn/ui components are accessible by default, preserve this
+6. **Customize with Tailwind**: Use Tailwind CSS classes to customize component appearance
+
+### Icon Usage
+
+Use **Lucide React** icons throughout the project:
+
+```tsx
+import { Plus, Search, User } from "lucide-react"
+
+<Button>
+  <Plus className="mr-2 h-4 w-4" />
+  Add Item
+</Button>
+```
+
+### Theme Customization
+
+- Color variables are defined in `app/globals.css`
+- The project supports both light and dark modes
+- Modify CSS variables in `:root` and `.dark` for theme changes
+- Use semantic color names: `primary`, `secondary`, `muted`, `accent`, `destructive`
+
+### Best Practices
+
+- **Server Components**: Use React Server Components by default (this project has RSC enabled)
+- **Client Components**: Only add `"use client"` directive when necessary (state, effects, event handlers)
+- **Consistent Styling**: Always use the theme's color palette and spacing system
+- **Responsive Design**: Use Tailwind responsive prefixes (`sm:`, `md:`, `lg:`, etc.)
+- **Type Safety**: Leverage TypeScript types provided by shadcn/ui components
+
+### Resources
+
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+- [Components List](https://ui.shadcn.com/docs/components)
+- [Lucide Icons](https://lucide.dev/icons)
+- [Tailwind CSS v4](https://tailwindcss.com)# Project Guidelines
+
+## UI Framework
+
+This project uses **shadcn/ui** for all UI elements and components.
+
+### shadcn/ui Configuration
+
+shadcn/ui is initialized in this project with the following settings:
+- **Style**: New York
+- **Base Color**: Slate
+- **Framework**: Next.js with React Server Components (RSC)
+- **Icon Library**: Lucide React
+- **CSS Variables**: Enabled
+- **Tailwind**: v4
+
+### File Structure
+
+```
+├── components/
+│   └── ui/               # shadcn/ui components go here
+├── lib/
+│   └── utils.ts          # cn() utility for merging Tailwind classes
+├── app/
+│   └── globals.css       # Theme colors and CSS variables
+└── components.json       # shadcn/ui configuration
+```
+
+### Adding Components
+
+If a particular shadcn/ui component is not installed, use the following command:
+
+```bash
+npx shadcn@latest add <component-name>
+```
+
+**Common Components:**
+```bash
+# Form elements
+npx shadcn@latest add button
+npx shadcn@latest add input
+npx shadcn@latest add textarea
+npx shadcn@latest add select
+npx shadcn@latest add checkbox
+npx shadcn@latest add radio-group
+npx shadcn@latest add switch
+npx shadcn@latest add slider
+npx shadcn@latest add form
+
+# Layout
+npx shadcn@latest add card
+npx shadcn@latest add separator
+npx shadcn@latest add accordion
+npx shadcn@latest add tabs
+
+# Overlays
+npx shadcn@latest add dialog
+npx shadcn@latest add sheet
+npx shadcn@latest add popover
+npx shadcn@latest add dropdown-menu
+npx shadcn@latest add alert-dialog
+
+# Feedback
+npx shadcn@latest add toast
+npx shadcn@latest add alert
+npx shadcn@latest add badge
+npx shadcn@latest add skeleton
+
+# Navigation
+npx shadcn@latest add navigation-menu
+npx shadcn@latest add breadcrumb
+npx shadcn@latest add pagination
+```
+
+### Component Usage Guidelines
+
+1. **Always use shadcn/ui components** instead of plain HTML elements
+2. **Import from the correct path**: `@/components/ui/<component-name>`
+3. **Use the `cn()` utility** from `@/lib/utils` to merge Tailwind classes:
+   ```tsx
+   import { cn } from "@/lib/utils"
+   
+   <Button className={cn("w-full", isActive && "bg-primary")} />
+   ```
+4. **Follow composition patterns**: Build complex UIs by composing shadcn/ui primitives
+5. **Maintain accessibility**: shadcn/ui components are accessible by default, preserve this
+6. **Customize with Tailwind**: Use Tailwind CSS classes to customize component appearance
+
+### Icon Usage
+
+Use **Lucide React** icons throughout the project:
+
+```tsx
+import { Plus, Search, User } from "lucide-react"
+
+<Button>
+  <Plus className="mr-2 h-4 w-4" />
+  Add Item
+</Button>
+```
+
+### Theme Customization
+
+- Color variables are defined in `app/globals.css`
+- The project supports both light and dark modes
+- Modify CSS variables in `:root` and `.dark` for theme changes
+- Use semantic color names: `primary`, `secondary`, `muted`, `accent`, `destructive`
+
+### Best Practices
+
+- **Server Components**: Use React Server Components by default (this project has RSC enabled)
+- **Client Components**: Only add `"use client"` directive when necessary (state, effects, event handlers)
+- **Consistent Styling**: Always use the theme's color palette and spacing system
+- **Responsive Design**: Use Tailwind responsive prefixes (`sm:`, `md:`, `lg:`, etc.)
+- **Type Safety**: Leverage TypeScript types provided by shadcn/ui components
+
+### Resources
+
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+- [Components List](https://ui.shadcn.com/docs/components)
+- [Lucide Icons](https://lucide.dev/icons)
+- [Tailwind CSS v4](https://tailwindcss.com)

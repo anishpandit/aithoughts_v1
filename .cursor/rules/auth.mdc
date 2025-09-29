@@ -1,0 +1,42 @@
+# Authentication Rules
+
+## Clerk Authentication
+- **ALL authentication is handled by Clerk** - do not implement custom auth
+- **ALWAYS use Clerk's auth() function** for getting current user
+- **ALWAYS check authentication** before accessing user data
+- **NEVER trust client-side authentication state** - always verify on server
+
+## User Data Access
+- **Users can ONLY access their own data** - never allow cross-user data access
+- **ALWAYS verify user ownership** before returning data
+- **ALWAYS use the current user's ID** from Clerk auth context
+- **NEVER expose other users' data** in API responses
+
+## Admin Authorization
+- **Admin status is determined by the app database**, NOT by Clerk
+- **ALWAYS check admin status** using `isUserAdmin()` from database
+- **ALWAYS verify admin privileges** before allowing admin operations
+- **NEVER assume admin status** from Clerk metadata
+
+## Examples
+```typescript
+// ✅ CORRECT - Proper auth check
+const { userId } = await auth();
+if (!userId) return redirect('/sign-in');
+
+// ✅ CORRECT - User data access
+const userData = await getUserSubscriptionByClerkId(userId);
+
+// ✅ CORRECT - Admin check
+const isAdmin = await isUserAdmin(userId);
+if (!isAdmin) return redirect('/');
+
+// ❌ WRONG - No auth check
+const userData = await getUserSubscriptionByClerkId('some-other-user-id');
+```
+
+## Security Principles
+- **Principle of least privilege** - users only see what they need
+- **Server-side validation** - never trust client-side data
+- **Role-based access control** - check permissions before operations
+- **Data isolation** - users cannot access other users' data

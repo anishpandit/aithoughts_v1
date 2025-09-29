@@ -1,0 +1,70 @@
+# Data Handling Rules
+
+## Server Components for Data Retrieval
+- **ALWAYS use server components** for data fetching
+- **NEVER fetch data in client components** unless absolutely necessary
+- **ALWAYS use async server components** for database queries
+- **ALWAYS handle loading and error states** in server components
+
+## Server Actions for Data Mutations
+- **ALL database writes must use server actions** - no direct API calls for mutations
+- **ALWAYS validate data with Zod** before processing
+- **ALWAYS use TypeScript types** - never use FormData as type
+- **ALWAYS handle errors gracefully** in server actions
+
+## Data Validation
+- **ALWAYS use Zod schemas** for data validation
+- **ALWAYS validate on server side** - never trust client validation
+- **ALWAYS provide proper error messages** for validation failures
+- **ALWAYS use TypeScript types** derived from Zod schemas
+
+## Examples
+```typescript
+// ✅ CORRECT - Server component with data fetching
+export default async function UserProfile() {
+  const { userId } = await auth();
+  if (!userId) redirect('/sign-in');
+  
+  const user = await getUserSubscriptionByClerkId(userId);
+  return <div>{user.name}</div>;
+}
+
+// ✅ CORRECT - Server action with validation
+import { z } from 'zod';
+
+const updateUserSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+});
+
+export async function updateUser(formData: { name: string; email: string }) {
+  const validatedData = updateUserSchema.parse(formData);
+  return await updateUserSubscription(userId, validatedData);
+}
+
+// ❌ WRONG - Client component fetching data
+'use client';
+export default function UserProfile() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    fetch('/api/user').then(res => res.json()).then(setUser);
+  }, []);
+}
+
+// ❌ WRONG - Using FormData as type
+export async function updateUser(formData: FormData) {
+  // Don't do this
+}
+```
+
+## Type Safety
+- **ALWAYS use proper TypeScript types** for all data
+- **ALWAYS derive types from Zod schemas** when possible
+- **NEVER use `any` type** - always be specific
+- **ALWAYS validate types at runtime** with Zod
+
+## Error Handling
+- **ALWAYS handle database errors** gracefully
+- **ALWAYS provide meaningful error messages** to users
+- **ALWAYS log errors** for debugging
+- **ALWAYS use proper HTTP status codes** for API responses

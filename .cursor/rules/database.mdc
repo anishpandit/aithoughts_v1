@@ -1,0 +1,32 @@
+# Database Rules
+
+## Database Interactions
+- **ALWAYS use Drizzle schema and queries** for all database operations
+- **NEVER use raw SQL** unless absolutely necessary and properly documented
+- **ALWAYS use the existing query functions** from `src/db/queries.ts`
+- **NEVER bypass the query layer** - all database access must go through the defined query functions
+
+## Schema Usage
+- Import schema from `src/db/schema.ts`
+- Use typed queries with proper TypeScript inference
+- Always use the `db` instance from `src/db/index.ts`
+
+## Query Functions
+- **READ operations**: Use functions like `getUserSubscriptionByClerkId()`, `getAllNewsletters()`, etc.
+- **WRITE operations**: Use functions like `createUserSubscription()`, `updateNewsletter()`, etc.
+- **ADMIN operations**: Use functions like `isUserAdmin()`, `setUserAsAdmin()`, etc.
+
+## Examples
+```typescript
+// ✅ CORRECT - Using Drizzle queries
+import { getUserSubscriptionByClerkId } from '@/src/db/queries';
+const user = await getUserSubscriptionByClerkId(clerkUserId);
+
+// ❌ WRONG - Raw database access
+const user = await db.select().from(userSubscriptionsTable).where(...);
+```
+
+## Data Validation
+- **ALWAYS validate data** before database operations
+- Use Zod schemas for validation
+- Ensure data integrity at the query level
