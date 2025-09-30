@@ -83,11 +83,6 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
   const [viewError, setViewError] = useState<string | null>(null);
   const [viewImage, setViewImage] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
-  const [showPromptManager, setShowPromptManager] = useState(false);
-  const [enhancedPrompt, setEnhancedPrompt] = useState<string>('');
-  const [promptEnhancement, setPromptEnhancement] = useState<any>(null);
-  const [enhancementLoading, setEnhancementLoading] = useState(false);
-  const [imageGenerationProgress, setImageGenerationProgress] = useState<string>('');
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiTitle, setAiTitle] = useState('');
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -285,14 +280,13 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
 
   // AI-powered newsletter generation
   const generateNewsletterWithAI = async () => {
-    const promptToUse = enhancedPrompt || aiPrompt;
+    const promptToUse = aiPrompt;
     if (!promptToUse.trim()) {
       toast.error('Please enter a prompt for AI generation');
       return;
     }
 
     setLoading(true);
-    setImageGenerationProgress('Generating newsletter content...');
     try {
       console.log('Generating newsletter with prompt:', promptToUse);
       const response = await fetch('/api/admin/newsletters/ai-generate', {
@@ -303,7 +297,6 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
         body: JSON.stringify({
           prompt: promptToUse,
           title: aiTitle || undefined,
-          includeMedia: true,
         }),
       });
 
@@ -344,8 +337,7 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
         setEditableContent(newsletterData.content);
         setShowPreviewModal(true);
         setShowAIModal(false);
-        setImageGenerationProgress('');
-        toast.success('AI content generated with images! Please review and edit before publishing.');
+        toast.success('AI content generated! Please review and edit before publishing.');
       } else {
         const error = await response.json();
         toast.error(`Error generating newsletter: ${error.error}`);
@@ -359,7 +351,6 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
       }
     } finally {
       setLoading(false);
-      setImageGenerationProgress('');
     }
   };
 
@@ -510,43 +501,6 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
     return null;
   };
 
-  // Prompt Manager - Enhance user prompts
-  const enhancePrompt = async () => {
-    if (!aiPrompt.trim()) {
-      toast.error('Please enter a prompt to enhance');
-      return;
-    }
-
-    setEnhancementLoading(true);
-    try {
-      const response = await fetch('/api/admin/newsletters/enhance-prompt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: aiPrompt,
-          contentType: 'newsletter'
-        }),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        setPromptEnhancement(result.data);
-        setEnhancedPrompt(result.data.enhancedPrompt);
-        setShowPromptManager(true);
-        toast.success('Prompt enhanced successfully!');
-      } else {
-        const error = await response.json();
-        toast.error(`Error enhancing prompt: ${error.error}`);
-      }
-    } catch (error) {
-      console.error('Error enhancing prompt:', error);
-      toast.error('Error enhancing prompt');
-    } finally {
-      setEnhancementLoading(false);
-    }
-  };
 
   const viewNewsletter = async (newsletter: Newsletter) => {
     setNewsletterToView(newsletter);
@@ -986,21 +940,10 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
                   required
                 />
               </div>
-              {imageGenerationProgress && (
-                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                    <span className="text-sm text-blue-300">{imageGenerationProgress}</span>
-                  </div>
-                </div>
-              )}
               
               <div className="flex space-x-2">
-                <Button onClick={enhancePrompt} disabled={enhancementLoading || loading} variant="outline" className="flex-1">
-                  {enhancementLoading ? 'Enhancing...' : '🧠 Enhance Prompt'}
-                </Button>
                 <Button onClick={generateNewsletterWithAI} disabled={loading} className="flex-1">
-                  {loading ? 'Generating...' : '🎨 Generate Newsletter with Images'}
+                  {loading ? 'Generating...' : '🎨 Generate Newsletter'}
                 </Button>
                 <Button onClick={() => setShowAIModal(false)} variant="outline" className="flex-1">
                   Cancel
@@ -1271,112 +1214,6 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
         </div>
       )}
 
-      {/* Prompt Manager Modal */}
-      {showPromptManager && promptEnhancement && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-white">🧠 Prompt Manager</h3>
-              <Button onClick={() => setShowPromptManager(false)} variant="outline" size="sm">
-                Close
-              </Button>
-            </div>
-            
-            <div className="space-y-6">
-              {/* Original vs Enhanced Prompt */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-white mb-3">📝 Original Prompt</h4>
-                  <div className="text-sm text-gray-300 bg-gray-800 p-3 rounded border">
-                    {promptEnhancement.originalPrompt}
-                  </div>
-                </div>
-                
-                <div className="bg-blue-900/20 rounded-lg p-4 border border-blue-500/30">
-                  <h4 className="text-lg font-semibold text-white mb-3">✨ Enhanced Prompt</h4>
-                  <div className="text-sm text-gray-200 bg-gray-800 p-3 rounded border">
-                    {promptEnhancement.enhancedPrompt}
-                  </div>
-                </div>
-              </div>
-
-              {/* Enhancement Reasoning */}
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h4 className="text-lg font-semibold text-white mb-3">💡 Enhancement Reasoning</h4>
-                <div className="text-sm text-gray-300 bg-gray-800 p-3 rounded border">
-                  {promptEnhancement.reasoning}
-                </div>
-              </div>
-
-              {/* Media Suggestions */}
-              {promptEnhancement.mediaSuggestions && (
-                <div className="bg-gray-700 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-white mb-3">🎨 Media Suggestions</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-300 mb-2">📸 Suggested Images</h5>
-                      <div className="space-y-2">
-                        {promptEnhancement.mediaSuggestions.images?.map((image: string, index: number) => (
-                          <div key={index} className="text-xs text-gray-400 bg-gray-800 p-2 rounded">
-                            {image}
-                          </div>
-                        ))}
-                        {(!promptEnhancement.mediaSuggestions.images || promptEnhancement.mediaSuggestions.images.length === 0) && (
-                          <div className="text-xs text-gray-500">No specific image suggestions</div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-300 mb-2">🎥 Suggested Videos</h5>
-                      <div className="space-y-2">
-                        {promptEnhancement.mediaSuggestions.videos?.map((video: string, index: number) => (
-                          <div key={index} className="text-xs text-gray-400 bg-gray-800 p-2 rounded">
-                            {video}
-                          </div>
-                        ))}
-                        {(!promptEnhancement.mediaSuggestions.videos || promptEnhancement.mediaSuggestions.videos.length === 0) && (
-                          <div className="text-xs text-gray-500">No specific video suggestions</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex justify-center space-x-4 pt-4 border-t border-gray-600">
-                <Button 
-                  onClick={() => {
-                    setAiPrompt(enhancedPrompt);
-                    setShowPromptManager(false);
-                    toast.success('Enhanced prompt applied!');
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Use Enhanced Prompt
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setEnhancedPrompt('');
-                    setPromptEnhancement(null);
-                    setShowPromptManager(false);
-                  }}
-                  variant="outline"
-                >
-                  Start Over
-                </Button>
-                <Button 
-                  onClick={() => setShowPromptManager(false)}
-                  variant="outline"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -21,112 +21,10 @@ export interface AIGenerationResult {
   error?: string;
 }
 
-export interface PromptEnhancementResult {
-  success: boolean;
-  data?: {
-    originalPrompt: string;
-    enhancedPrompt: string;
-    mediaSuggestions: {
-      images: string[];
-      videos: string[];
-    };
-    reasoning: string;
-  };
-  error?: string;
-}
-
-// Prompt Manager - Enhances user prompts for better content generation
-export async function enhancePrompt(
-  originalPrompt: string,
-  contentType: 'newsletter' | 'blog' = 'newsletter'
-): Promise<PromptEnhancementResult> {
-  try {
-    if (!process.env.OPENAI_API_KEY) {
-      return {
-        success: false,
-        error: 'OpenAI API key not configured'
-      };
-    }
-
-    const systemPrompt = `You are an expert content strategist and prompt engineer. Your job is to enhance user prompts to create more engaging, comprehensive, and professional content.
-
-ENHANCEMENT GUIDELINES:
-- Add specific details and context to make prompts more actionable
-- Suggest relevant multimedia elements (images, videos, infographics)
-- Include target audience considerations
-- Add trending topics and current events when relevant
-- Ensure the enhanced prompt will generate high-quality, engaging content
-- Maintain the original intent while expanding scope
-- Consider SEO and social media optimization
-- Suggest content structure and key points to cover
-
-Your response should be a JSON object with:
-- originalPrompt: the user's original prompt
-- enhancedPrompt: your improved version
-- mediaSuggestions: { images: [], videos: [] }
-- reasoning: brief explanation of your enhancements`;
-
-    const userPrompt = `Enhance this ${contentType} prompt for better content generation:
-
-Original prompt: "${originalPrompt}"
-
-Please enhance it to create more engaging, comprehensive content that will generate high-quality articles. Consider:
-- Adding specific details and context
-- Suggesting relevant images and videos
-- Including current trends and insights
-- Making it more actionable and valuable
-- Ensuring it will appeal to our target audience (tech professionals, entrepreneurs, AI enthusiasts)`;
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt }
-      ],
-      max_tokens: 1000,
-      temperature: 0.7,
-    });
-
-    const response = completion.choices[0]?.message?.content;
-    if (!response) {
-      return {
-        success: false,
-        error: 'No enhancement generated'
-      };
-    }
-
-    try {
-      const enhanced = JSON.parse(response);
-      return {
-        success: true,
-        data: enhanced
-      };
-    } catch (parseError) {
-      // Fallback if JSON parsing fails
-      return {
-        success: true,
-        data: {
-          originalPrompt,
-          enhancedPrompt: response,
-          mediaSuggestions: { images: [], videos: [] },
-          reasoning: 'Enhanced prompt generated'
-        }
-      };
-    }
-
-  } catch (error) {
-    console.error('Error enhancing prompt:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Failed to enhance prompt'
-    };
-  }
-}
 
 export async function generateNewsletterContent(
   prompt: string, 
-  customTitle?: string,
-  includeMedia: boolean = true
+  customTitle?: string
 ): Promise<AIGenerationResult> {
   try {
     if (!process.env.OPENAI_API_KEY) {
@@ -149,8 +47,6 @@ IMPORTANT GUIDELINES:
 - Write in markdown format
 - Keep content informative and well-researched
 - Avoid generic templates or placeholder content
-- Include relevant image and video suggestions where appropriate
-- Use multimedia elements to enhance engagement
 
 Your response should be a complete newsletter article that someone would actually want to read and share.`;
 
@@ -165,10 +61,7 @@ The newsletter should:
 - Be engaging and professional
 - Provide real value to readers
 - Be 800-1500 words in length
-- Include relevant images to enhance the content
-- Use multimedia elements to enhance engagement
 
-${includeMedia ? 'Include 2-3 relevant images in your content using placeholder URLs like ![Detailed image description for AI generation](https://placeholder.com/800x400) for images that would enhance the article. Make the image descriptions detailed and specific so AI can generate amazing visuals.' : ''}
 
 Format your response as a complete newsletter article in markdown.`;
 
@@ -217,52 +110,8 @@ Format your response as a complete newsletter article in markdown.`;
     // Generate relevant tags based on content
     const tags = generateTagsFromContent(generatedContent, prompt);
 
-    // Generate actual images using DALL-E for enhanced newsletters
-    let finalContent = generatedContent;
-    let images: string[] = [];
-    let videos: string[] = [];
-    
-    if (includeMedia) {
-      console.log('Generating images for newsletter content...');
-      
-      // Find all image placeholders in the content
-      const imageMatches = generatedContent.match(/!\[(.*?)\]\((.*?)\)/g);
-      if (imageMatches && imageMatches.length > 0) {
-        console.log(`Found ${imageMatches.length} image placeholders to generate`);
-        
-        for (const match of imageMatches) {
-          const [, description, placeholderUrl] = match.match(/!\[(.*?)\]\((.*?)\)/) || [];
-          if (description && description.trim()) {
-            try {
-              console.log(`Generating image for: ${description}`);
-              const actualImageUrl = await generateNewsletterImage(description, title);
-              if (actualImageUrl) {
-                finalContent = finalContent.replace(match, `![${description}](${actualImageUrl})`);
-                images.push(actualImageUrl);
-                console.log(`Successfully generated image: ${actualImageUrl}`);
-              } else {
-                console.warn(`Failed to generate image for: ${description}`);
-                // Keep the placeholder if generation fails
-              }
-            } catch (error) {
-              console.error(`Error generating image for "${description}":`, error);
-              // Keep the placeholder if generation fails
-            }
-          }
-        }
-      }
-
-      // Extract any remaining video links
-      const videoMatches = finalContent.match(/\[.*?\]\((.*?)\)/g);
-      if (videoMatches) {
-        videos = videoMatches.map(match => {
-          const urlMatch = match.match(/\[.*?\]\((.*?)\)/);
-          return urlMatch ? urlMatch[1] : '';
-        }).filter(url => url && !images.includes(url));
-      }
-      
-      console.log(`Generated ${images.length} images and found ${videos.length} videos`);
-    }
+    // No image generation - just return the content as-is
+    const finalContent = generatedContent;
 
     return {
       success: true,
@@ -273,8 +122,8 @@ Format your response as a complete newsletter article in markdown.`;
         excerpt,
         tags,
         readTime,
-        images: includeMedia ? images : undefined,
-        videos: includeMedia ? videos : undefined
+        images: undefined,
+        videos: undefined
       }
     };
 
@@ -318,54 +167,3 @@ function generateTagsFromContent(content: string, prompt: string): string[] {
   return Array.from(tags).slice(0, 5); // Limit to 5 tags
 }
 
-// Generate actual images for newsletter content
-async function generateNewsletterImage(description: string, title: string): Promise<string | null> {
-  try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn('OpenAI API key not configured for image generation');
-      return null;
-    }
-
-    // Create a more specific and engaging prompt for image generation
-    const imagePrompt = `Create a stunning, professional image for a tech newsletter article titled "${title}". 
-
-    Specific image description: ${description}
-    
-    Visual style requirements:
-    - Modern, sleek, and professional design
-    - High-quality, magazine-worthy composition
-    - Perfect for a technology/AI newsletter
-    - Clean, minimalist aesthetic
-    - Vibrant but professional colors
-    - No text or overlays
-    - Focus on visual impact and engagement
-    - Suitable for both web and print
-    - High contrast and sharp details`;
-
-    console.log(`Generating DALL-E image with prompt: ${imagePrompt.substring(0, 100)}...`);
-
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: imagePrompt,
-      n: 1,
-      size: "1024x1024",
-      quality: "hd",
-      style: "vivid"
-    });
-
-    const imageUrl = response.data[0]?.url;
-    if (imageUrl) {
-      console.log('✅ Successfully generated DALL-E image:', imageUrl);
-      return imageUrl;
-    } else {
-      console.warn('❌ No image URL returned from DALL-E');
-      return null;
-    }
-  } catch (error) {
-    console.error('❌ Error generating newsletter image:', error);
-    if (error instanceof Error) {
-      console.error('Error details:', error.message);
-    }
-    return null;
-  }
-}

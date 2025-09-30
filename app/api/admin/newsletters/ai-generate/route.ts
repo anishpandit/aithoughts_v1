@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     if (authError) return authError;
 
     const body = await request.json();
-    const { prompt, title, content, publish, authorId = 'admin', includeMedia = true } = body;
+    const { prompt, title, content, publish, authorId = 'admin' } = body;
     
     console.log('AI Generate API called with:', {
       hasPrompt: !!prompt,
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Prompt is required' }, { status: 400 });
       }
 
-      const aiResponse = await generateNewsletterContent(prompt, title, includeMedia);
+      const aiResponse = await generateNewsletterContent(prompt, title);
       
       if (!aiResponse.success || !aiResponse.data) {
         return NextResponse.json({ success: false, error: 'error' in aiResponse ? aiResponse.error : 'Failed to generate content' }, { status: 500 });
