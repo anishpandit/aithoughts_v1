@@ -11,6 +11,7 @@ import {
 import { dark } from "@clerk/themes";
 import { Button } from "@/components/ui/button";
 import { Navigation } from "@/components/navigation";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -67,6 +68,7 @@ export default function RootLayout({
             </div>
           </header>
           {children}
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
