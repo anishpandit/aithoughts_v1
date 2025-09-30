@@ -1103,30 +1103,6 @@ export default function AdminDashboardClient({ initialData }: AdminDashboardClie
                 </div>
                 
                 <h1 className="text-3xl font-bold text-white mb-4 leading-tight">{newsletterToView.title}</h1>
-                
-                {/* AI Generated Header Image */}
-                <div className="relative w-full h-48 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg overflow-hidden mb-4">
-                  {imageLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-                      <div className="text-white text-sm">🎨 Generating AI image...</div>
-                    </div>
-                  )}
-                  {viewImage && (
-                    <img 
-                      src={viewImage} 
-                      alt={newsletterToView.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  {!imageLoading && !viewImage && (
-                    <div className="absolute inset-0 flex items-center justify-center text-white">
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">📰</div>
-                        <div className="text-sm opacity-80">AI Thoughts Newsletter</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
 
               {/* Newsletter Content Preview */}
